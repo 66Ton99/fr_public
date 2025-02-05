@@ -1,0 +1,8 @@
+^F:\SRC\FR_PUBLIC\WERKKZEUG3_KKRIEGER\DEPACK2.ASM
+nasmw -f bin -o "Debug\depack2.bin" "F:\src\fr_public\werkkzeug3_kkrieger\depack2.asm"
+^F:\SRC\FR_PUBLIC\WERKKZEUG3_KKRIEGER\DEPACKER.ASM
+nasmw -f bin -o "Debug\depacker.bin" "F:\src\fr_public\werkkzeug3_kkrieger\depacker.asm"
+^F:\SRC\FR_PUBLIC\WERKKZEUG3_KKRIEGER\_VIRUZ2A.ASM
+nasmw -f win32 -o"Debug\_viruz2a.obj" "F:\src\fr_public\werkkzeug3_kkrieger\_viruz2a.asm"
+^F:\SRC\FR_PUBLIC\WERKKZEUG3_KKRIEGER\BASE\BASE_DATA.ASM
+nasmw -f win32 -o"Debug\base_data.obj" "F:\src\fr_public\werkkzeug3_kkrieger\base\base_data.asm" -DDEPACKER=\"Debug\depacker.bin\" -DDEPACK2=\"Debug\depack2.bin\"

@@ -1,0 +1,15 @@
+[constants]
+arch = 'mingw32'
+
+[binaries]
+c = arch + '-gcc'
+cpp = arch + '-g++'
+ar = 'ar'
+strip = arch + '-strip'
+windres = arch + '-windres'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86'
+cpu = 'i686'
+endian = 'little'

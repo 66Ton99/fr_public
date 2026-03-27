@@ -3,5 +3,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LocalDebuggerCommandArguments>$(ProjectDir)../data/debris_chaos.kx</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArgumentsHistory>F:\src\fr_public\werkkzeug3_kkrieger\player_demo\../data/debris_chaos.kx|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
 </Project>

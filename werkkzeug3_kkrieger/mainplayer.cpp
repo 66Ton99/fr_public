@@ -37,6 +37,50 @@ extern sInt IntroLoop;
 
 /****************************************************************************/
 
+static sBool ValidatePlayerDataBlob(const sU8 *data,sInt dataSize)
+{
+  if(!data || dataSize <= 0)
+    return sFALSE;
+
+  const sU8 *p = data;
+  const sU8 *end = data + dataSize;
+  sU32 flags,sizeAligned;
+
+#define NEED_BYTES(n) if(p + (n) > end) return sFALSE
+
+  NEED_BYTES(4);
+  flags = *(const sU32 *)p;
+  p += 4;
+
+  if(flags & 1)
+  {
+    NEED_BYTES(32);
+    p += 32;
+  }
+
+  NEED_BYTES(4);
+  sizeAligned = *(const sU32 *)p;
+  p += 4;
+  sizeAligned = (sizeAligned + 3) & ~3;
+  NEED_BYTES((sInt)sizeAligned);
+  p += sizeAligned;
+
+  if(flags & 2)
+  {
+    NEED_BYTES(4);
+    sizeAligned = *(const sU32 *)p;
+    p += 4;
+    sizeAligned = (sizeAligned + 3) & ~3;
+    NEED_BYTES((sInt)sizeAligned);
+    p += sizeAligned;
+  }
+
+  NEED_BYTES(8 + 2 + 2 + MAX_OP_ROOT*2);
+
+#undef NEED_BYTES
+  return sTRUE;
+}
+
 #if sLINK_KKRIEGER
 struct VFXEntry
 {
@@ -195,6 +239,9 @@ sBool sAppHandler(sInt code,sDInt value)
         if(data==0)
           sSystem->Abort("need data file");
       }
+
+      if(!ValidatePlayerDataBlob(data,dataSize))
+        sSystem->Abort("invalid data file");
     }
 //#endif
 
@@ -209,6 +256,9 @@ sBool sAppHandler(sInt code,sDInt value)
 
   case sAPPCODE_INIT:
     Document = new KDoc;
+
+    if(dataSize > 0 && !ValidatePlayerDataBlob(data,dataSize))
+      sSystem->Abort("invalid data file");
 
     Document->Init(data, dataSize);
     Environment = new KEnvironment;

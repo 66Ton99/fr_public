@@ -139,6 +139,9 @@ KHandler KHandlers[] =
   0xd0, Init_Material_Material, Exec_Material_Material,     // material
   0xd1, Material_Add,           Exec_Misc_Nop,              // add material
   0xd2, Init_Scene_MatHack,     Exec_Scene_MatHack,         // link material for animation
+#if sLINK_MTRL20
+  0xd3, Init_Material_Material20, Exec_Misc_Nop,            // material 2.0
+#endif
 
   // ipp
   0xe2, Init_IPP_Copy,          Exec_IPP_Copy,              // copy

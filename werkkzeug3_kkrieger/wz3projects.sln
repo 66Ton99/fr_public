@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31424.327
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.0.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base", "base\base.vcxproj", "{62C73706-20EC-4838-999D-210ECFC18986}"
 EndProject
@@ -64,6 +64,7 @@ Global
 		{62C73706-20EC-4838-999D-210ECFC18986}.Release|x86.ActiveCfg = Release|Win32
 		{62C73706-20EC-4838-999D-210ECFC18986}.Release|x86.Build.0 = Release|Win32
 		{C330C7DF-71AE-49AC-BA16-9089F4C85516}.Debug|x86.ActiveCfg = Debug|Win32
+		{C330C7DF-71AE-49AC-BA16-9089F4C85516}.Debug|x86.Build.0 = Debug|Win32
 		{C330C7DF-71AE-49AC-BA16-9089F4C85516}.DoPE debug|x86.ActiveCfg = Debug|Win32
 		{C330C7DF-71AE-49AC-BA16-9089F4C85516}.DoPE debug|x86.Build.0 = Debug|Win32
 		{C330C7DF-71AE-49AC-BA16-9089F4C85516}.DoPE|x86.ActiveCfg = Debug|Win32
@@ -74,6 +75,7 @@ Global
 		{C330C7DF-71AE-49AC-BA16-9089F4C85516}.Player Release|x86.Build.0 = Release|Win32
 		{C330C7DF-71AE-49AC-BA16-9089F4C85516}.Release|x86.ActiveCfg = Release|Win32
 		{C777BC6A-EDA8-444E-B212-E06A94C2CF17}.Debug|x86.ActiveCfg = Debug|Win32
+		{C777BC6A-EDA8-444E-B212-E06A94C2CF17}.Debug|x86.Build.0 = Debug|Win32
 		{C777BC6A-EDA8-444E-B212-E06A94C2CF17}.DoPE debug|x86.ActiveCfg = Debug|Win32
 		{C777BC6A-EDA8-444E-B212-E06A94C2CF17}.DoPE debug|x86.Build.0 = Debug|Win32
 		{C777BC6A-EDA8-444E-B212-E06A94C2CF17}.DoPE|x86.ActiveCfg = Debug|Win32
@@ -85,6 +87,7 @@ Global
 		{C777BC6A-EDA8-444E-B212-E06A94C2CF17}.Release|x86.ActiveCfg = Release|Win32
 		{C777BC6A-EDA8-444E-B212-E06A94C2CF17}.Release|x86.Build.0 = Release|Win32
 		{7A5AABAC-000F-4CE5-9471-74C2C5746EF7}.Debug|x86.ActiveCfg = Debug|Win32
+		{7A5AABAC-000F-4CE5-9471-74C2C5746EF7}.Debug|x86.Build.0 = Debug|Win32
 		{7A5AABAC-000F-4CE5-9471-74C2C5746EF7}.DoPE debug|x86.ActiveCfg = Debug|Win32
 		{7A5AABAC-000F-4CE5-9471-74C2C5746EF7}.DoPE debug|x86.Build.0 = Debug|Win32
 		{7A5AABAC-000F-4CE5-9471-74C2C5746EF7}.DoPE|x86.ActiveCfg = Debug|Win32
@@ -162,6 +165,7 @@ Global
 		{38067567-F305-45BB-B9ED-54B86F559BF7}.Player Release|x86.Build.0 = Release|Win32
 		{38067567-F305-45BB-B9ED-54B86F559BF7}.Release|x86.ActiveCfg = Release|Win32
 		{62520ADF-98B0-40B5-9A6C-53F7320012DB}.Debug|x86.ActiveCfg = Debug|Win32
+		{62520ADF-98B0-40B5-9A6C-53F7320012DB}.Debug|x86.Build.0 = Debug|Win32
 		{62520ADF-98B0-40B5-9A6C-53F7320012DB}.DoPE debug|x86.ActiveCfg = Debug|Win32
 		{62520ADF-98B0-40B5-9A6C-53F7320012DB}.DoPE debug|x86.Build.0 = Debug|Win32
 		{62520ADF-98B0-40B5-9A6C-53F7320012DB}.DoPE|x86.ActiveCfg = Debug|Win32

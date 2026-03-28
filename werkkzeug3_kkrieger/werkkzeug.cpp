@@ -6358,25 +6358,31 @@ sBool WerkExport::Export(WerkDoc *doc,sU8 *&dataPtr)
 
   SongSize = 0;
   SampleSize = 0;
-  if(doc->SongName)
+  SongData = 0;
+  SampleData = 0;
+
+  if(doc->SongName[0])
   {
     SongData = sSystem->LoadFile(doc->SongName,SongSize);
     if(!SongData)
       SongSize = 0;
 
-    sInt snlen = sGetStringLen(Doc->SongName);
-    if(snlen < 4 || sCmpMem(Doc->SongName + snlen - 4,".ogg",4))
+    if(SongSize > 0)
     {
-      // v2mconv
-      sInt convertedSize;
-      sU8 *convertBuffer = sViruz2::ConvertV2M(SongData,SongSize,convertedSize);
+      sInt snlen = sGetStringLen(Doc->SongName);
+      if(snlen < 4 || sCmpMem(Doc->SongName + snlen - 4,".ogg",4))
+      {
+        // v2mconv
+        sInt convertedSize;
+        sU8 *convertBuffer = sViruz2::ConvertV2M(SongData,SongSize,convertedSize);
 
-      delete[] SongData;
-      SongData = convertBuffer;
-      SongSize = convertedSize;
+        delete[] SongData;
+        SongData = convertBuffer;
+        SongSize = convertedSize;
+      }
     }
   }
-  if(doc->SampleName)
+  if(doc->SampleName[0])
   {
     SampleData = sSystem->LoadFile(doc->SampleName,SampleSize);
     if(!SampleData)
@@ -8580,4 +8586,3 @@ void WerkSceneNode2::UpdateLinks(WerkDoc *doc1)
 
 /****************************************************************************/
 /****************************************************************************/
-

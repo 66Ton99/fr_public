@@ -5260,7 +5260,8 @@ void sSystem_::Sample3DListener(const sVector &pos,const sVector &vel,const sVec
   params.flDopplerFactor = doppler;
 
 #if !sINTRO
-  Listener->SetAllParameters(&params,DS3D_DEFERRED);
+  if(Listener)
+    Listener->SetAllParameters(&params,DS3D_DEFERRED);
 #endif
 }
 
@@ -5285,7 +5286,8 @@ void sSystem_::Sample3DCommit()
         if(buf->PlayTime && buf->PlayTime + sam->LenMs < SoundTime)
         {
           buf->PlayTime = 0;
-          buf->Buf3D->SetMode(DS3DMODE_DISABLE,DS3D_DEFERRED);
+          if(buf->Buf3D)
+            buf->Buf3D->SetMode(DS3DMODE_DISABLE,DS3D_DEFERRED);
         }
       }
     }
@@ -5293,7 +5295,8 @@ void sSystem_::Sample3DCommit()
 
   // commit settings
 #if !sINTRO
-  Listener->CommitDeferredSettings();
+  if(Listener)
+    Listener->CommitDeferredSettings();
 #endif
   SoundTime = sSystem->GetTime();
 }

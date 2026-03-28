@@ -81,6 +81,37 @@ static sBool ValidatePlayerDataBlob(const sU8 *data,sInt dataSize)
   return sTRUE;
 }
 
+static const sU8 *TryWrapLegacyPlayerDataBlob(const sU8 *data,sInt &dataSize)
+{
+  if(!data || dataSize < 16)
+    return 0;
+
+  sU32 songSize = *(const sU32 *)data;
+  if(songSize == 0 || songSize >= (sU32)dataSize)
+    return 0;
+
+  const sU8 *p = data + 4 + sAlign(songSize,4);
+  const sU8 *end = data + dataSize;
+
+  if(p + 4 > end)
+    return 0;
+
+  sU32 sampleSize = *(const sU32 *)p;
+  p += 4;
+
+  if(sampleSize == 0 || p + sAlign(sampleSize,4) + 8 > end)
+    return 0;
+
+  if(*(const sU32 *)p != sMAKE4('V','F','X','0'))
+    return 0;
+
+  sU8 *fixed = new sU8[dataSize + 4];
+  *(sU32 *)fixed = 2;
+  sCopyMem(fixed + 4,data,dataSize);
+  dataSize += 4;
+  return fixed;
+}
+
 #if sLINK_KKRIEGER
 struct VFXEntry
 {
@@ -238,6 +269,13 @@ sBool sAppHandler(sInt code,sDInt value)
         data = sSystem->LoadFile("bpopening_05.kx", dataSize);
         if(data==0)
           sSystem->Abort("need data file");
+      }
+
+      if(!ValidatePlayerDataBlob(data,dataSize))
+      {
+        const sU8 *fixed = TryWrapLegacyPlayerDataBlob(data,dataSize);
+        if(fixed)
+          data = fixed;
       }
 
       if(!ValidatePlayerDataBlob(data,dataSize))

@@ -1620,12 +1620,32 @@ void KDoc::Init(const sU8 *&dataPtr, sInt dataSize)
   cls = KClasses;
   clsend = &KClasses[255];
   nClasses = 0;
+  sInt classIdBytes = 2;
 
   while((conv = *((sU32 *) data)))
   {
     data += 4;
     cls->Convention = conv;
-    i = *((sU16 *)data); data+=2;
+
+    sInt clsid16 = *((sU16 *)data);
+    sInt clsid8 = data[0];
+
+    if(nClasses == 0)
+    {
+      KHandler *probe16 = KHandlers;
+      while(probe16->Id && probe16->Id != clsid16)
+        probe16++;
+
+      KHandler *probe8 = KHandlers;
+      while(probe8->Id && probe8->Id != clsid8)
+        probe8++;
+
+      if(!probe16->Id && probe8->Id)
+        classIdBytes = 1;
+    }
+
+    i = (classIdBytes == 1) ? clsid8 : clsid16;
+    data += classIdBytes;
     cls->Packing = (sChar *) data;
     while(*data++);
     if (data >= dataEnd)

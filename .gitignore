@@ -2,4 +2,5 @@
 *.swp
 **/Debug/
 **/Release/
+/werkkzeug3_kkrieger/player_kkrieger_runtime.log
 

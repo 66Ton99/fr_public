@@ -768,13 +768,8 @@ sNORETURN void __cdecl sFatal(char *format,...);
 #endif
 
 #if sDEBUG
-#if sRELEASE
 #define sVERIFY(x) {if(!(x))sVerifyFalse(sTXT(__FILE__),__LINE__);}
 #define sVERIFYFALSE {sVerifyFalse(sTXT(__FILE__),__LINE__);}
-#else
-#define sVERIFY(x) {if(!(x)){__asm { int 3 };sVerifyFalse(sTXT(__FILE__),__LINE__);}}
-#define sVERIFYFALSE {__asm{ int 3 };sVerifyFalse(sTXT(__FILE__),__LINE__);}
-#endif
 #else
 #define sVERIFY(x) {;}
 #define sVERIFYFALSE {;}

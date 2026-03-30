@@ -15,7 +15,9 @@
 
 #define sPLAYER_SCREENX     800
 #define sPLAYER_SCREENY     600
+#ifndef sPLAYER_FULLSCREEN
 #define sPLAYER_FULLSCREEN  !sDEBUG
+#endif
 #define sPLAYER_DIALOG      1
 
 #define sINTRO_NO_ALT_TAB   0 // setting this to 1 saves ~190 bytes
@@ -2369,7 +2371,9 @@ void sSystem_::Render()
 #if !sINTRO_NO_ALT_TAB
     Sleep(100);
     hr = DXDev->TestCooperativeLevel();
-    if(hr!=D3DERR_DEVICENOTRESET)
+    if(hr==D3DERR_DEVICELOST)
+      return;
+    if(hr!=D3DERR_DEVICENOTRESET && hr!=D3DERR_INVALIDCALL)
       return;
     InitScreens();
     if(WDeviceLost)
@@ -2401,7 +2405,18 @@ void sSystem_::Render()
 
   DXERROR(DXDev->BeginScene());
   sAppHandler(sAPPCODE_PAINT,0);
-  DXERROR(DXDev->EndScene());
+  hr = DXDev->EndScene();
+  if(FAILED(hr))
+  {
+    // Resolution/fullscreen switches can transiently invalidate EndScene.
+    // Recover via the normal device-lost path instead of aborting.
+    if(hr==D3DERR_DEVICELOST || hr==D3DERR_DEVICENOTRESET || hr==D3DERR_INVALIDCALL)
+    {
+      WDeviceLost = 1;
+      return;
+    }
+    DXERROR(hr);
+  }
 
 #if sPROFILE
   sPerfMon->Marker(1);

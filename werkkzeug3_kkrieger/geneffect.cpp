@@ -326,6 +326,7 @@ void __stdcall Exec_Effect_Print(KOp *op,KEnvironment *kenv,sInt flags,sF32 size
   sMaterialEnv env;
   sInt centerchar;
   sBool inf;
+  sBool leftCenteredMenuText;
 
   mat = (GenMaterial *) op->GetLinkCache(0);
   if(!mat)
@@ -368,6 +369,7 @@ void __stdcall Exec_Effect_Print(KOp *op,KEnvironment *kenv,sInt flags,sF32 size
     {
       x = 0;
       centerchar = -1;
+      leftCenteredMenuText = sFALSE;
 
       p = buffer;
       while(*text!=0 && *text!='\n')
@@ -514,20 +516,38 @@ void __stdcall Exec_Effect_Print(KOp *op,KEnvironment *kenv,sInt flags,sF32 size
       *p++ =0 ;
 
       p = buffer;
-      
-      switch((flags&0x300)>>8)
+
+#if sLINK_KKRIEGER
+      if(kenv->Game)
       {
-      case 0:
-        break;
-      case 1:
-        if(centerchar>=0)
-          x -= pi.Width(p,centerchar);
-        else
-          x -= pi.Width(p)/2;
-        break;
-      case 2:
-        x -= pi.Width(p);
-        break;
+        const sInt gs = kenv->Game->Switches[KGS_GAME];
+        const sBool inIngameMenu = (gs==KGS_GAME_INGAME && kenv->Game->Switches[KGS_INGAME_MENU]==1);
+        if(gs==KGS_GAME_START || gs==KGS_GAME_OPTIONS || gs==KGS_GAME_CREDITS || inIngameMenu)
+          leftCenteredMenuText = sTRUE;
+      }
+#endif
+
+      if(leftCenteredMenuText)
+      {
+        // Keep menu text block centered on screen, but align glyph flow to the left.
+        x -= pi.Width(p)/2;
+      }
+      else
+      {
+        switch((flags&0x300)>>8)
+        {
+        case 0:
+          break;
+        case 1:
+          if(centerchar>=0)
+            x -= pi.Width(p,centerchar);
+          else
+            x -= pi.Width(p)/2;
+          break;
+        case 2:
+          x -= pi.Width(p);
+          break;
+        }
       }
       while(*p)
       {

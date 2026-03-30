@@ -1933,11 +1933,7 @@ void __cdecl sDPrintF(const sChar *format,...)
 
 void sVerifyFalse(const sChar *file,sInt line)
 {
-#if !sINTRO
   sFatal(sTXT("%s(%d) : assertion"),file,line);
-#else
-  sFatal(sTXT("assertion"));
-#endif
 }
 
 #if !sINTRO || !sRELEASE

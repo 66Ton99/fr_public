@@ -707,7 +707,7 @@ struct sSystem_
 
   void AllocBufferInternal(sGeoBufferRef &ref,sInt size,sBool stat,sInt index,void **ptr);
 
-#if !sINTRO_XXX                   // uncommenting this makes everything LARGER!
+#if !sINTRO                   // uncommenting this makes everything LARGER!
   sInt CmdFullscreen;
   sInt CmdWindowed;
   sInt CmdLowQuality;
@@ -715,7 +715,7 @@ struct sSystem_
 #endif
   sInt CmdLowRes;
   sInt WDeviceLost;               // device is lost
-#if !sINTRO_XXX
+#if !sINTRO
   sInt WActiveCount;              // incremented and decremented, 0 = active;
   sInt WActiveMsg;                // maintain WActiveCount for WM_ACTIVATE 
   sInt WContinuous;               // (not implemented) enable continous rendering

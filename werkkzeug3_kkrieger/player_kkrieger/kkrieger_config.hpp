@@ -17,6 +17,7 @@
 #define sUNICODE          0                         // define sCHAR as 16bit
 #define sMOBILE           0                         // mobile devices - very limited types.hpp
 #define sDEBUG            0                         // include debug code in release build
+#define sPLAYER_FULLSCREEN 0                        // force fullscreen even in Debug (_types.hpp sets sDEBUG=1 there)
 #define sLIBPATH          "../"                     // libs (ogg,...) relative to project path
 
 // what is supported?

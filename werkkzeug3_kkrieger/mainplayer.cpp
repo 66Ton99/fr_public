@@ -23,7 +23,9 @@ KKriegerGame *Game;
 sF32 GlobalFps;
 
 
+#if sLINK_KKRIEGER
 extern "C" sU8 DebugData[];
+#endif
 static sU8* PtrTable[] =
 {
   (sU8 *) 0x54525450,     // entry 0: export data ('PTRT')
@@ -204,7 +206,9 @@ sBool sAppHandler(sInt code,sDInt value)
         if(data==0)
         {
           // Final fallback for developer/runtime builds: use data blob baked into data.asm.
+#if sLINK_KKRIEGER
           data = DebugData;
+#endif
         }
       }
     }
@@ -241,7 +245,9 @@ sBool sAppHandler(sInt code,sDInt value)
     if(data==0)
     {
       // Final fallback for developer/runtime builds: use data blob baked into data.asm.
+#if sLINK_KKRIEGER
       data = DebugData;
+#endif
     }
 
     // KDoc::Init expects exported runtime stream whose first dword is small flags bitfield.

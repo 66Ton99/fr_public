@@ -396,24 +396,24 @@ void checkHeap()
 
 void * __cdecl operator new(unsigned int size)
 {
-	return HeapAlloc(GetProcessHeap(),HEAP_NO_SERIALIZE,size);
+	return HeapAlloc(GetProcessHeap(),0,size);
 }
 
 void * __cdecl operator new[](unsigned int size)
 {
-  return HeapAlloc(GetProcessHeap(),HEAP_NO_SERIALIZE,size);
+  return HeapAlloc(GetProcessHeap(),0,size);
 }
 
 void __cdecl operator delete(void *ptr)
 {
   if(ptr)
-  	HeapFree(GetProcessHeap(),HEAP_NO_SERIALIZE,ptr);
+  	HeapFree(GetProcessHeap(),0,ptr);
 }
 
 void __cdecl operator delete[](void *ptr)
 {
   if(ptr)
-  	HeapFree(GetProcessHeap(),HEAP_NO_SERIALIZE,ptr);
+  	HeapFree(GetProcessHeap(),0,ptr);
 }
 
 int __cdecl _purecall()
@@ -1028,7 +1028,9 @@ void sSystem_::InitX()
 #endif
 
 #if sUSE_DIRECTSOUND
-  ExitDS();
+  if(DXSBuffer)
+    DXSBuffer->Stop();
+//  ExitDS();
 #endif
   sBroker->Free();      // some objects may still hold resources, like Geometries
   sBroker->Dump();
@@ -1911,9 +1913,7 @@ void sSystem_::InitX()
   sAppHandler(sAPPCODE_EXIT,0);
 
 #if sUSE_DIRECTSOUND
-  if(DXSBuffer)
-    DXSBuffer->Stop();
-//  ExitDS();
+  ExitDS();
 #endif
 
   ExitProcess(0);
@@ -1973,11 +1973,29 @@ void sSystem_::InitScreens()
   else
   {
     RECT r;
+    RECT wr;
+    HWND wnd = (HWND) Screen[0].Window;
+    DWORD style;
 
     d3dpp.Windowed = TRUE;
-    GetClientRect((HWND) Screen[0].Window,&r);
+    if(ConfigX>0 && ConfigY>0)
+    {
+      // In windowed mode, keep client size in sync with requested resolution.
+      GetWindowRect(wnd,&wr);
+      r.left = r.top = 0;
+      r.right = ConfigX;
+      r.bottom = ConfigY;
+      style = (DWORD) GetWindowLong(wnd,GWL_STYLE);
+      AdjustWindowRect(&r,style,FALSE);
+      ::SetWindowPos(wnd,0,wr.left,wr.top,r.right-r.left,r.bottom-r.top,
+        SWP_NOZORDER|SWP_NOACTIVATE|SWP_FRAMECHANGED);
+    }
+
+    GetClientRect(wnd,&r);
     Screen[0].XSize = r.right-r.left;
     Screen[0].YSize = r.bottom-r.top;
+    ConfigX = Screen[0].XSize;
+    ConfigY = Screen[0].YSize;
   }
 
   hr=DXD->GetDeviceCaps(0,D3DDEVTYPE_HAL,&caps);
@@ -2136,8 +2154,13 @@ void sSystem_::Exit()
 #if sUSE_LEKKTOR
   sLekktorExit();
 #endif
-   DestroyWindow ((HWND)Screen[0].Window);
-//  PostQuitMessage(0);
+#if sINTRO && sPLAYER
+  // Avoid fragile teardown path in intro/player runtime on modern systems.
+  ExitProcess(0);
+#else
+  DestroyWindow((HWND)Screen[0].Window);
+//PostQuitMessage(0);
+#endif
 }
 
 void sSystem_::Tag()
@@ -2373,6 +2396,13 @@ void sSystem_::Render()
     hr = DXDev->TestCooperativeLevel();
     if(hr==D3DERR_DEVICELOST)
       return;
+    // Some drivers report S_OK right after a mode switch/reset path.
+    // Clear the lost flag in that case and continue rendering.
+    if(hr==S_OK)
+    {
+      WDeviceLost = 0;
+      return;
+    }
     if(hr!=D3DERR_DEVICENOTRESET && hr!=D3DERR_INVALIDCALL)
       return;
     InitScreens();
@@ -2410,11 +2440,13 @@ void sSystem_::Render()
   {
     // Resolution/fullscreen switches can transiently invalidate EndScene.
     // Recover via the normal device-lost path instead of aborting.
-    if(hr==D3DERR_DEVICELOST || hr==D3DERR_DEVICENOTRESET || hr==D3DERR_INVALIDCALL)
+    if(hr==D3DERR_DEVICELOST || hr==D3DERR_DEVICENOTRESET)
     {
       WDeviceLost = 1;
       return;
     }
+    if(hr==D3DERR_INVALIDCALL)
+      return;
     DXERROR(hr);
   }
 

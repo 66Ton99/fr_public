@@ -1725,15 +1725,17 @@ void KKriegerGame::OnOptionsChanged()
   // update resolution if necessary
   static const sInt xRes[] = { 640,800,1024,1280 };
   static const sInt yRes[] = { 480,600, 768,1024 };
-  sInt res = Switches[KGS_RESOLUTION];
+  sInt res = sRange<sInt>(Switches[KGS_RESOLUTION],3,0);
+
+  if(res != Switches[KGS_RESOLUTION])
+    Switches[KGS_RESOLUTION] = res;
 
 #if sPLAYER
-  if(xRes[res] != sSystem->ConfigX) // resolution changed?
+  if(xRes[res] != sSystem->ConfigX || yRes[res] != sSystem->ConfigY) // resolution changed?
   {
+    // Defer actual device reset to app frame boundary in sAppHandler.
     sSystem->ConfigX = xRes[res];
     sSystem->ConfigY = yRes[res];
-
-    sSystem->InitScreens();
   }
 #endif
 }
@@ -2617,6 +2619,27 @@ sBool KKriegerGame::CollideRay(
   sBool isnotplayer;
 
   GAMEPERF(CallFindFirstIntersect);
+  KKriegerCellAdd *foundCell;
+  foundCell = FindCell(p0);
+  if(foundCell==0)
+    foundCell = FindCell(p1);
+
+  if(foundCell)
+    cadd = foundCell;
+  else if(cadd==0)
+    return sFALSE;
+  else
+  {
+    sBool caddKnown = sFALSE;
+    for(i=0;i<CellAdd.Count;i++)
+      if(CellAdd[i]==cadd)
+        caddKnown = sTRUE;
+    if(!caddKnown)
+      cadd = 0;
+    if(cadd==0)
+      return sFALSE;
+  }
+
   list[0] = cadd;
   count = 1;
 
@@ -2636,14 +2659,24 @@ again:
     {
       for(i=0;i<cadd->Adds.Count;i++)
       {
-        sVERIFY(cadd->Adds[i]!=cadd);
-        if(cadd->Adds[i]->OutsideMask(v)==0)
+        KKriegerCellAdd *nextAdd = cadd->Adds[i];
+        if(nextAdd==0 || nextAdd==cadd)
+          goto retry;
+
+        sBool nextKnown = sFALSE;
+        for(j=0;j<CellAdd.Count;j++)
+          if(CellAdd[j]==nextAdd)
+            nextKnown = sTRUE;
+        if(!nextKnown)
+          goto retry;
+
+        if(nextAdd->OutsideMask(v)==0)
         {
           for(j=0;j<count;j++)
-            if(list[j]==cadd->Adds[i])
+            if(list[j]==nextAdd)
               goto retry;
 
-          cadd = cadd->Adds[i];
+          cadd = nextAdd;
           list[count++] = cadd;
           goto again;
         }
@@ -2702,9 +2735,20 @@ sBool KKriegerGame::CollideRaySub(const sVector &d,const sVector &p1,const sVect
   for(j=0;j<count;j++)
   {
     cadd = list[j];
+    if(cadd==0)
+      continue;
+
+    sBool listKnown = sFALSE;
+    for(i=0;i<CellAdd.Count;i++)
+      if(CellAdd[i]==cadd)
+        listKnown = sTRUE;
+    if(!listKnown)
+      continue;
     for(i=0;i<cadd->Subs.Count;i++)
     {
       cell = cadd->Subs[i];
+      if(cell==0)
+        continue;
       if((cell->Mode&3)==KCM_SUB)
       {
         if(CollideRaySub2(d,p1,p0,cell,ci))
@@ -2719,6 +2763,8 @@ sBool KKriegerGame::CollideRaySub(const sVector &d,const sVector &p1,const sVect
     for(i=0;i<cadd->Zones.Count;i++)
     {
       cell = cadd->Zones[i];
+      if(cell==0)
+        continue;
       hit0 = (cell->OutsideMask(p0)==0);
       hit1 = (cell->OutsideMask(p1)==0);
 
@@ -2934,8 +2980,9 @@ KKriegerCellAdd *KKriegerGame::FindCell(const sVector &v)
   sInt i;
   for(i=0;i<CellAdd.Count;i++)
   {
-    if(CellAdd[i]->OutsideMask(v)==0)
-      return CellAdd[i];
+    KKriegerCellAdd *cell = CellAdd[i];
+    if(cell && cell->OutsideMask(v)==0)
+      return cell;
   }
   return 0;
 }
@@ -3034,6 +3081,8 @@ void KKriegerGame::CollideSoftSphereAdd(sVector &sphere, KKriegerCellAdd **cellL
   int i, j;
 
   cell = cellList[count-1];
+  if(cell==0)
+    return;
   if(sFAbs(cell->approxDistance(sphere)) < sphere.w)
   {
     GenSimpleFaceList *face;
@@ -3048,23 +3097,37 @@ void KKriegerGame::CollideSoftSphereAdd(sVector &sphere, KKriegerCellAdd **cellL
 
   for(i = 0; i < cell->Adds.Count; i++)
   {
-    if(cell->Adds[i]->approxDistance(sphere) < sphere.w)
+    KKriegerCellAdd *add = cell->Adds[i];
+    if(add==0)
+      continue;
+
+    sBool addKnown = sFALSE;
+    for(j=0;j<CellAdd.Count;j++)
+      if(CellAdd[j]==add)
+        addKnown = sTRUE;
+    if(!addKnown)
+      continue;
+
+    if(add->approxDistance(sphere) < sphere.w)
     {
       for(j = 0; j < count; j++)
-        if(cell->Adds[i] == cellList[j])
+        if(add == cellList[j])
           break;
 
       if(j == count && count < 16)
       {
-        cellList[count++] = cell->Adds[i];
+        cellList[count++] = add;
         CollideSoftSphereAdd(sphere, cellList, count);
       }
     }
   }
 
   for(i = 0; i < cell->Subs.Count; i++)
-    if(cell->Subs[i]->approxDistance(sphere) < sphere.w)
-      CollideSoftSphereSub(sphere, cell->Subs[i]);
+  {
+    KKriegerCell *sub = cell->Subs[i];
+    if(sub && sub->approxDistance(sphere) < sphere.w)
+      CollideSoftSphereSub(sphere, sub);
+  }
 }
 
 void KKriegerGame::CollideSoftSphereSub(sVector &sphere, KKriegerCell *cell)
@@ -3242,6 +3305,8 @@ void KKriegerGame::CreateCollisionFaces(KKriegerCellAdd &add)
 
   for(i = 0; i < add.Adds.Count; i++)
   {
+    if(add.Adds[i]==0)
+      continue;
     cur = add.Faces;
     add.Faces = 0;
     while(cur != 0)

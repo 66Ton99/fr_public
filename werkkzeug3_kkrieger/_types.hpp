@@ -767,7 +767,7 @@ sNORETURN void __cdecl sFatal(char *format,...);
 
 #endif
 
-#if sDEBUG
+#if sDEBUG && !sPLAYER
 #define sVERIFY(x) {if(!(x))sVerifyFalse(sTXT(__FILE__),__LINE__);}
 #define sVERIFYFALSE {sVerifyFalse(sTXT(__FILE__),__LINE__);}
 #else

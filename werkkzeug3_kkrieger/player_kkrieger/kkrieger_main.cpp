@@ -40,6 +40,7 @@ extern sInt IntroLoop;
 
 static sInt ForceRoot = -1;
 static sInt ForceGameState = -1;
+static sInt ForceResolution = -1;
 static FILE *RuntimeLog = 0;
 static sInt NextRuntimeLogTime = 0;
 
@@ -70,6 +71,10 @@ static void ParseDebugCmdLineOptions()
   p = sFindString(cmd,"--forcestate=");
   if(p)
     ForceGameState = sAtoi(p+13);
+
+  p = sFindString(cmd,"--forceres=");
+  if(p)
+    ForceResolution = sAtoi(p+11);
 }
 
 /****************************************************************************/
@@ -98,10 +103,12 @@ static void RenderSoundEffects(KDoc *doc,sU8 *data)
   sF32 amp,ampx;
   VFXEntry *ent;
 
-  sVERIFY(Sound);
+  if(!Sound || !data)
+    return;
 
   data32 = (sU32 *) data;
-  sVERIFY(data32[0] == sMAKE4('V','F','X','0'));
+  if(data32[0] != sMAKE4('V','F','X','0'))
+    return;
   size = data32[1];
   v2m = (sU8 *) &data32[2];
   data32 = (sU32 *) (((sU8 *)data32)+size+12);
@@ -208,6 +215,8 @@ sBool sAppHandler(sInt code,sDInt value)
   static sF32 oldfps;
   static sInt FirstTime,ThisTime,LastTime,sample;
   static sInt framectr=0;
+  static sInt LastConfigX = -1;
+  static sInt LastConfigY = -1;
   
   KOp *root;
 
@@ -225,7 +234,7 @@ sBool sAppHandler(sInt code,sDInt value)
     RuntimeLog = fopen("player_kkrieger_runtime.log","wt");
     NextRuntimeLogTime = 0;
     RuntimeLogWrite("startup cmdline='%s'\n",sSystem->GetCmdLine() ? sSystem->GetCmdLine() : "");
-    RuntimeLogWrite("forceroot=%d forcestate=%d\n",ForceRoot,ForceGameState);
+    RuntimeLogWrite("forceroot=%d forcestate=%d forceres=%d\n",ForceRoot,ForceGameState,ForceResolution);
 
     data = PtrTable[0];
     if(((sInt)data)==0x54525450)
@@ -321,6 +330,8 @@ sBool sAppHandler(sInt code,sDInt value)
     Game->ResetRoot(Environment,Document->RootOps[Document->CurrentRoot],1);
     if(ForceGameState>=0 && ForceGameState<256)
       Game->Switches[KGS_GAME] = ForceGameState;
+    if(ForceResolution>=0 && ForceResolution<=3)
+      Game->Switches[KGS_RESOLUTION] = ForceResolution;
     RuntimeLogWrite("after reset: currentRoot=%d gameState=%d\n",Document->CurrentRoot,Game->Switches[KGS_GAME]);
 
     FirstTime = sSystem->GetTime();
@@ -358,6 +369,15 @@ sBool sAppHandler(sInt code,sDInt value)
     // tick processing (moved up to reduce input lag by 1 frame)
 
     ThisTime = sSystem->GetTime() - FirstTime;
+
+    // Force normal root rebuild path after a resolution change.
+    if(LastConfigX!=sSystem->ConfigX || LastConfigY!=sSystem->ConfigY)
+    {
+      sSystem->Reset(sSystem->ConfigFlags,sSystem->ConfigX,sSystem->ConfigY,0,0);
+      LastConfigX = sSystem->ConfigX;
+      LastConfigY = sSystem->ConfigY;
+      Document->CurrentRoot = -1;
+    }
 
     beat = sMulDiv(ThisTime,Document->SongBPM,60000);
 

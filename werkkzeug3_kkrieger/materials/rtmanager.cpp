@@ -3,8 +3,29 @@
 #include "_types.hpp"
 #include "_start.hpp"
 #include "rtmanager.hpp"
+#include <d3d9.h>
 
 /****************************************************************************/
+
+static sInt GetMaxPow2RTSize(sBool useWidth)
+{
+  // Keep render-target textures power-of-two to match legacy assumptions,
+  // but derive the upper bound from the actual device caps.
+  sInt maxSize = 2048;
+
+  if(sSystem && sSystem->DXD)
+  {
+    D3DCAPS9 caps;
+    if(SUCCEEDED(sSystem->DXD->GetDeviceCaps(0,D3DDEVTYPE_HAL,&caps)))
+      maxSize = useWidth ? (sInt) caps.MaxTextureWidth : (sInt) caps.MaxTextureHeight;
+  }
+
+  sInt maxPow2 = 1;
+  while((maxPow2<<1) > 0 && (maxPow2<<1) <= maxSize)
+    maxPow2 <<= 1;
+
+  return maxPow2;
+}
 
 void RenderTargetManager_::GetRealResolution(const Target *tgt,sInt &xRes,sInt &yRes) const
 {
@@ -20,11 +41,13 @@ void RenderTargetManager_::ResizeInternal(Target *tgt,sInt xRes,sInt yRes)
   tgt->YRes = yRes;
   GetRealResolution(tgt,useXRes,useYRes);
 
-  sInt texXRes = sMin(sMakePower2(useXRes),2048);
-  sInt texYRes = sMin(sMakePower2(useYRes),2048);
+  sInt texXRes = sMin(sMakePower2(useXRes),GetMaxPow2RTSize(sTRUE));
+  sInt texYRes = sMin(sMakePower2(useYRes),GetMaxPow2RTSize(sFALSE));
 
-  // re-allocate texture if necessary
-  if(texXRes > tgt->TexXRes || texYRes > tgt->TexYRes)
+  // Re-allocate texture whenever power-of-two backing size changes.
+  // Growing-only reallocation leaves stale oversized RTs after resolution
+  // decreases, which can produce postprocess artifacts.
+  if(texXRes != tgt->TexXRes || texYRes != tgt->TexYRes)
   {
     if(tgt->Handle != sINVALID)
       sSystem->RemTexture(tgt->Handle);
@@ -74,8 +97,8 @@ void RenderTargetManager_::SetMasterViewport(const sViewport &vp)
   {
     Target *tgt = &Targets[i];
 
-    if(!tgt->XRes && !tgt->YRes)
-      ResizeInternal(tgt,0,0);
+    if(!tgt->XRes || !tgt->YRes)
+      ResizeInternal(tgt,tgt->XRes,tgt->YRes);
   }
 }
 

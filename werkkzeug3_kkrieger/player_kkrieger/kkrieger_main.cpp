@@ -40,6 +40,8 @@ extern sInt IntroLoop;
 
 static sInt ForceRoot = -1;
 static sInt ForceGameState = -1;
+static sInt ForceSwitchIndex = -1;
+static sInt ForceSwitchValue = 0;
 static FILE *RuntimeLog = 0;
 static sInt NextRuntimeLogTime = 0;
 
@@ -70,6 +72,19 @@ static void ParseDebugCmdLineOptions()
   p = sFindString(cmd,"--forcestate=");
   if(p)
     ForceGameState = sAtoi(p+13);
+
+  p = sFindString(cmd,"--setsw=");
+  if(p)
+  {
+    ForceSwitchIndex = sAtoi(p+8);
+    const sChar *c = p+8;
+    while(*c>='0' && *c<='9')
+      c++;
+    if(*c==',' || *c==':' || *c=='=')
+      ForceSwitchValue = sAtoi(c+1);
+    else
+      ForceSwitchValue = 1;
+  }
 }
 
 /****************************************************************************/
@@ -226,6 +241,7 @@ sBool sAppHandler(sInt code,sDInt value)
     NextRuntimeLogTime = 0;
     RuntimeLogWrite("startup cmdline='%s'\n",sSystem->GetCmdLine() ? sSystem->GetCmdLine() : "");
     RuntimeLogWrite("forceroot=%d forcestate=%d\n",ForceRoot,ForceGameState);
+    RuntimeLogWrite("forcesw=%d value=%d\n",ForceSwitchIndex,ForceSwitchValue);
 
     data = PtrTable[0];
     if(((sInt)data)==0x54525450)
@@ -321,6 +337,8 @@ sBool sAppHandler(sInt code,sDInt value)
     Game->ResetRoot(Environment,Document->RootOps[Document->CurrentRoot],1);
     if(ForceGameState>=0 && ForceGameState<256)
       Game->Switches[KGS_GAME] = ForceGameState;
+    if(ForceSwitchIndex>=0 && ForceSwitchIndex<KKRIEGER_SWITCHES)
+      Game->Switches[ForceSwitchIndex] = ForceSwitchValue;
     RuntimeLogWrite("after reset: currentRoot=%d gameState=%d\n",Document->CurrentRoot,Game->Switches[KGS_GAME]);
 
     FirstTime = sSystem->GetTime();
@@ -355,6 +373,7 @@ sBool sAppHandler(sInt code,sDInt value)
     break;
 #endif
   case sAPPCODE_PAINT:
+    {
     // tick processing (moved up to reduce input lag by 1 frame)
 
     ThisTime = sSystem->GetTime() - FirstTime;
@@ -378,7 +397,20 @@ sBool sAppHandler(sInt code,sDInt value)
     // root-switching logic and outermost stuff
 
     vp.Init();
-    vp.Window.Init(0,0,sSystem->ConfigX,sSystem->ConfigY);
+    {
+      sInt y0 = sSystem->ConfigY*1/6;
+      sInt y1 = sSystem->ConfigY*5/6;
+      vp.Window.Init(0,y0,sSystem->ConfigX,y1);
+
+      sBool menuState = (Game->Switches[KGS_GAME]==KGS_GAME_START)
+        || (Game->Switches[KGS_GAME]==KGS_GAME_CREDITS)
+        || (Game->Switches[KGS_GAME]==KGS_GAME_OPTIONS)
+        || (Game->Switches[KGS_GAME]==KGS_GAME_INGAME && Game->Switches[KGS_INGAME_MENU]==1);
+      if(menuState)
+      {
+        vp.Window.Init(0,y0,sSystem->ConfigX,y1);
+      }
+    }
     GenOverlayManager->SetMasterViewport(vp);
     RenderTargetManager->SetMasterViewport(vp);
 
@@ -423,8 +455,17 @@ sBool sAppHandler(sInt code,sDInt value)
 
     Environment->GameCam.Init();
     Game->GetCamera(Environment->GameCam);
-    Environment->GameCam.ZoomY = 1.0f*vp.Window.XSize()/vp.Window.YSize();
-    Environment->Aspect = 1.0f*vp.Window.XSize()/vp.Window.YSize();
+    sF32 drawAspect = 1.0f*vp.Window.XSize()/vp.Window.YSize();
+    sBool menuState = (Game->Switches[KGS_GAME]==KGS_GAME_START)
+      || (Game->Switches[KGS_GAME]==KGS_GAME_CREDITS)
+      || (Game->Switches[KGS_GAME]==KGS_GAME_OPTIONS)
+      || (Game->Switches[KGS_GAME]==KGS_GAME_INGAME && Game->Switches[KGS_INGAME_MENU]==1);
+    if(menuState)
+      drawAspect = 1.10f;
+    if(menuState)
+      Environment->GameCam.CenterX = 0.18f;
+    Environment->GameCam.ZoomY = drawAspect;
+    Environment->Aspect = drawAspect;
 
     if(Document->CurrentRoot<0 || Document->CurrentRoot>=MAX_OP_ROOT || !Document->RootOps[Document->CurrentRoot])
     {
@@ -465,6 +506,7 @@ sBool sAppHandler(sInt code,sDInt value)
     Environment->Mem.Flush();
 //    sSystem->SetWinMouse(vp.Window.x1/2,vp.Window.y1/2);
     break;
+    }
 
   case sAPPCODE_KEY:
 #if sPROJECT==sPROJ_KKRIEGER

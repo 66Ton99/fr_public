@@ -6,8 +6,14 @@
 
                 section .data
 
+                global  _DebugData
+                global  _LoaderTune
+                global  _LoaderTuneSize
                 global  _Material11vsfr
                 global  _Material11psfr
+_DebugData:
+_LoaderTune:
+_LoaderTuneSize dd $-_LoaderTune
 _Material11vsfr incbin  "../data/material11.vsfr"                
 _Material11psfr incbin  "../data/material11.psfr"
 

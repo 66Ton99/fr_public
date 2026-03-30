@@ -978,10 +978,8 @@ sInt KKriegerGame::GetNewRoot()
 {
 #if sLINK_KKRIEGER
   sInt sw = Switches[KGS_GAME];
-  sInt mode = 1;
+  sInt mode = 2;
 
-  if(sw==KGS_GAME_RUN || sw==KGS_GAME_INGAME || sw==KGS_GAME_RESTART)
-    mode = 2;
   if(sw==KGS_GAME_INTRO)
     mode = 0;
   if(sw==KGS_GAME_QUIT)

@@ -33,5 +33,6 @@ There is no unified unit-test framework. Validate by:
 1. Successful build of changed project(s).
 2. Runtime smoke test for touched executable(s) (launch, basic flow, clean exit).
 3. For renderer/UI changes, include before/after screenshots and reproduction steps.
+4. For `player_kkrieger` runtime debugging, run under a debugger even if it is not in `PATH` (use full executable path, e.g. Windows Kits `cdb.exe`), and save verification screenshots to `tmp/`.
 
 Document exact build command and runtime scenario in PR notes.

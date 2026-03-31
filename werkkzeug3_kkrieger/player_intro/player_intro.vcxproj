@@ -92,13 +92,13 @@
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>StdCall</CallingConvention>
+      <CallingConvention>Cdecl</CallingConvention>
       <ForcedIncludeFiles>$(SolutionDir)/player_intro/intro_config.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;dxguid.lib;dinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>ucrt.lib;vcruntime.lib;libcmt.lib;libcpmt.lib;oldnames.lib;legacy_stdio_definitions.lib;winmm.lib;dxguid.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)player_intro.exe</OutputFile>
-      <IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -182,6 +182,14 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">INTRO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">INTRO;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\materials\materials.vcxproj">
+      <Project>{d945e86f-50eb-4d36-bd8b-cb2ffa167a1a}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

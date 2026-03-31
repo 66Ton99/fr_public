@@ -8,5 +8,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerWorkingDirectory>F:\src\fr_public\werkkzeug3_kkrieger</LocalDebuggerWorkingDirectory>
     <LocalDebuggerCommandArguments>data\kkrieger3383.kx</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArgumentsHistory>data\kkrieger3383.kx|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
 </Project>

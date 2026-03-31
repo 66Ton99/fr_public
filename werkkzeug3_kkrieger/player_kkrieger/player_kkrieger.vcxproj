@@ -190,6 +190,22 @@
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
     </ProjectReference>
   </ItemGroup>
+  <Target Name="StageReleasePackage" AfterTargets="Build" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PropertyGroup>
+      <ReleasePackageDir>$(OutDir)package\</ReleasePackageDir>
+    </PropertyGroup>
+    <MakeDir Directories="$(ReleasePackageDir)" />
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ReleasePackageDir)" SkipUnchangedFiles="true" />
+    <Delete Files="$(ReleasePackageDir)$(TargetName).pdb" Condition="Exists('$(ReleasePackageDir)$(TargetName).pdb')" />
+    <RemoveDir Directories="$(ReleasePackageDir)data" Condition="Exists('$(ReleasePackageDir)data')" />
+    <MakeDir Directories="$(ReleasePackageDir)data" />
+    <ItemGroup>
+      <ReleaseDataFiles Include="$(ProjectDir)..\data\kkrieger3383.kx" Condition="Exists('$(ProjectDir)..\data\kkrieger3383.kx')" />
+      <ReleaseDataFiles Include="$(ProjectDir)..\data\kkrieger.kx" Condition="Exists('$(ProjectDir)..\data\kkrieger.kx')" />
+      <ReleaseDataFiles Include="$(ProjectDir)..\data\player_kkrieger_export.kx" Condition="Exists('$(ProjectDir)..\data\player_kkrieger_export.kx')" />
+    </ItemGroup>
+    <Copy SourceFiles="@(ReleaseDataFiles)" DestinationFiles="@(ReleaseDataFiles->'$(ReleasePackageDir)data\%(Filename)%(Extension)')" SkipUnchangedFiles="true" Condition="'@(ReleaseDataFiles)'!=''" />
+  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

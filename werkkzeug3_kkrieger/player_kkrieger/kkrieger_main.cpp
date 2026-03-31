@@ -231,8 +231,10 @@ sBool sAppHandler(sInt code,sDInt value)
 
   case sAPPCODE_INIT:
     ParseDebugCmdLineOptions();
+#if defined(_DEBUG)
     RuntimeLog = fopen("player_kkrieger_runtime.log","wt");
     NextRuntimeLogTime = 0;
+#endif
     RuntimeLogWrite("startup cmdline='%s'\n",sSystem->GetCmdLine() ? sSystem->GetCmdLine() : "");
     RuntimeLogWrite("forceroot=%d forcestate=%d forceres=%d\n",ForceRoot,ForceGameState,ForceResolution);
 

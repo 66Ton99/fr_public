@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#if defined(_MSC_VER) && _MSC_VER >= 1900
+#if defined(_MSC_VER) && _MSC_VER >= 1900 && _MSC_VER < 1910
 extern "C" FILE* __cdecl __acrt_iob_func(unsigned);
 extern "C" FILE _iob[] = {
   *(__acrt_iob_func(0)),

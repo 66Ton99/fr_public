@@ -10,7 +10,13 @@
                 global  _PlayerKKrieger
                 global  _PlayerIntro
 
-_PlayerDemo     incbin  "../player_demo/debug/player_demo.exe"
-_PlayerKKrieger incbin  "../player_demo/debug/player_demo.exe"
+%ifdef WZ3_DEBUG
+%define PLAYER_DEMO_PATH "../player_demo/debug/player_demo.exe"
+%else
+%define PLAYER_DEMO_PATH "../player_demo/release/player_demo.exe"
+%endif
+
+_PlayerDemo     incbin  PLAYER_DEMO_PATH
+_PlayerKKrieger incbin  PLAYER_DEMO_PATH
 		;incbin  "../player_kkrieger/release/player_kkrieger.exe"
-_PlayerIntro    incbin  "../player_demo/debug/player_demo.exe"
+_PlayerIntro    incbin  PLAYER_DEMO_PATH

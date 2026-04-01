@@ -61,7 +61,7 @@
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <ForcedIncludeFiles>$(SolutionDir)/player_intro/intro_config.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)intro_config.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)player_intro.exe</OutputFile>
@@ -93,7 +93,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CallingConvention>Cdecl</CallingConvention>
-      <ForcedIncludeFiles>$(SolutionDir)/player_intro/intro_config.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+      <ForcedIncludeFiles>$(ProjectDir)intro_config.hpp;%(ForcedIncludeFiles)</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <AdditionalDependencies>ucrt.lib;vcruntime.lib;libcmt.lib;libcpmt.lib;oldnames.lib;legacy_stdio_definitions.lib;winmm.lib;dxguid.lib;dinput8.lib;%(AdditionalDependencies)</AdditionalDependencies>

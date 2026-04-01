@@ -2240,6 +2240,20 @@ void sSystem_::CheckMem()
 {
   _CrtCheckMemory();
 }
+#else
+
+void sSystem_::Reset(sU32 flags,sInt x,sInt y,sInt x2,sInt y2)
+{
+  (void)x2;
+  (void)y2;
+
+  ConfigFlags = flags;
+  ConfigX = x;
+  ConfigY = y;
+
+  if(KeyIndex < MAX_KEYBUFFER)
+    KeyBuffer[KeyIndex++] = sKEY_MODECHANGE;
+}
 #endif
 
 sChar *sSystem_::GetCmdLine()
